@@ -5,6 +5,8 @@ import (
 //        "encoding/json"
 
         "hub-gen-auto/pkg/resources"
+        "hub-gen-auto/pkg/requirements"
+
 //        "hub-gen-auto/pkg/experiments"
        )
 
@@ -52,6 +54,10 @@ func Generate(clusterName string, res []*resources.Resources) {
 		fmt.Printf("Le nom est : %s\n", namespace.Namespace)
 		for _, composant := range namespace.Deploys.Items {
 	                fmt.Printf("Composant Trouvé : %s\n", composant.Name)
+			ready := requirements.CheckHaveLabels(composant)
+			if ready = true {
+				fmt.Printf("Le composant a bien les labels necessaire !!")
+                        }
                 }
         }
 
