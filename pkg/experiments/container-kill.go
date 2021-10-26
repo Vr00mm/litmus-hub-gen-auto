@@ -2,10 +2,10 @@ package containerKill
 
 import (
 	"hub-gen-auto/pkg/requirements"
-       )
+)
 
-var experimentRequirements = []string {"isRoot"}
+var experimentRequirements = []string{"isRoot"}
 
-func CheckRequirements() (bool) {
+func CheckRequirements() bool {
 	return requirements.CheckRequirements(experimentRequirements)
 }

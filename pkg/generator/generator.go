@@ -2,13 +2,12 @@ package generator
 
 import (
 	"fmt"
-//        "encoding/json"
+	//        "encoding/json"
+	"hub-gen-auto/pkg/requirements"
+	"hub-gen-auto/pkg/resources"
 	"strings"
-        "hub-gen-auto/pkg/resources"
-        "hub-gen-auto/pkg/requirements"
-
-//        "hub-gen-auto/pkg/experiments"
-       )
+	//        "hub-gen-auto/pkg/experiments"
+)
 
 type Workflow struct {
 	Name        string   `yaml:"name"`
@@ -34,16 +33,15 @@ type Hub struct {
 	Experiments []Experiment `yaml:"experiments"`
 }
 
-type Project	struct {
-        Name    string  `yaml:"name"`
-	Project	[]Hub	`yaml:"project"`
+type Project struct {
+	Name    string `yaml:"name"`
+	Project []Hub  `yaml:"project"`
 }
 
 type Projects struct {
-	Name	string	`yaml:"name"`
-	Projects	[]Project	`yaml:"projects"`
+	Name     string    `yaml:"name"`
+	Projects []Project `yaml:"projects"`
 }
-
 
 func generateFromResources() {
 
@@ -53,24 +51,24 @@ type Labels map[string]string
 
 func Generate(clusterName string, res []*resources.Resources) {
 	for _, namespace := range res {
-                targetLabels := make(map[string]map[string]string, len(namespace.Deploys.Items)) //string //map[string]map[string]strin
+		targetLabels := make(map[string]map[string]string, len(namespace.Deploys.Items)) //string //map[string]map[string]strin
 		for _, composant := range namespace.Deploys.Items {
 			ready := requirements.CheckHaveLabels(composant.ObjectMeta.Labels)
 			if ready == true {
-		                targetLabels[composant.Name] = make(map[string]string, len(composant.ObjectMeta.Labels)) //string //map[string]map[string]string
-                                targetLabels[composant.Name] = composant.ObjectMeta.Labels
-                        }
-                }
-                for _, composant := range namespace.Stss.Items {
-                        ready := requirements.CheckHaveLabels(composant.ObjectMeta.Labels)
-                        if ready == true {
-                                targetLabels[composant.Name] = make(map[string]string, len(composant.ObjectMeta.Labels)) //string //map[string]map[string]string
-                                targetLabels[composant.Name] = composant.ObjectMeta.Labels
-                        }
-                }
+				targetLabels[composant.Name] = make(map[string]string, len(composant.ObjectMeta.Labels)) //string //map[string]map[string]string
+				targetLabels[composant.Name] = composant.ObjectMeta.Labels
+			}
+		}
+		for _, composant := range namespace.Stss.Items {
+			ready := requirements.CheckHaveLabels(composant.ObjectMeta.Labels)
+			if ready == true {
+				targetLabels[composant.Name] = make(map[string]string, len(composant.ObjectMeta.Labels)) //string //map[string]map[string]string
+				targetLabels[composant.Name] = composant.ObjectMeta.Labels
+			}
+		}
 
 		newVar := requirements.FindUniqueLabelsBb(targetLabels)
-		if len(namespace.Deploys.Items) + len (namespace.Stss.Items) == len(newVar) && len(newVar) > 0 {
+		if len(namespace.Deploys.Items)+len(namespace.Stss.Items) == len(newVar) && len(newVar) > 0 {
 			skip := false
 			for _, labels := range newVar {
 				for _, label := range labels {
@@ -80,11 +78,11 @@ func Generate(clusterName string, res []*resources.Resources) {
 				}
 			}
 			if !skip {
-			 fmt.Printf("Le namespace %s est pret pour le chaos: %s\n", namespace.Namespace, newVar)
+				fmt.Printf("Le namespace %s est pret pour le chaos: %s\n", namespace.Namespace, newVar)
 			}
 		}
-        }
+	}
 
-//	file, _ := json.MarshalIndent(manifest, "", " ")
-//	fmt.Println(string(file))
+	//	file, _ := json.MarshalIndent(manifest, "", " ")
+	//	fmt.Println(string(file))
 }

@@ -3,16 +3,16 @@ package resources
 import (
 	"context"
 	"fmt"
-	"os"
 	appsv1 "k8s.io/api/apps/v1"
 	autov1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
-        batchv1beta1 "k8s.io/api/batch/v1beta1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-//	"encoding/json"
+	"os"
+	//	"encoding/json"
 )
 
 var (
@@ -55,45 +55,44 @@ type Resources struct {
 
 // NewResources resturns Resources for the namespace
 func GetResources(clientset kubernetes.Interface) ([]*Resources, error) {
-        var err error
-        var result []*Resources
+	var err error
+	var result []*Resources
 
-            // Get namespaces list
-        namespaces, err := GetNamespaces(clientset)
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "Failed to get k8s namespaces: %v\n", err)
-        }
+	// Get namespaces list
+	namespaces, err := GetNamespaces(clientset)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to get k8s namespaces: %v\n", err)
+	}
 
-        for _, namespace := range namespaces.Items {
-            res := &Resources{clientset: clientset, Namespace: namespace.Name}
+	for _, namespace := range namespaces.Items {
+		res := &Resources{clientset: clientset, Namespace: namespace.Name}
 
-            // statefulset
-            res.Stss, err = clientset.AppsV1().StatefulSets(namespace.Name).List(context.TODO(), metav1.ListOptions{})
-            if err != nil {
-                    return nil, fmt.Errorf("failed to get statefulsets in namespace %q: %v", namespace.Name, err)
-            }
-            // daemonset
-//            res.Dss, err = clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
-//            if err != nil {
-//                    return nil, fmt.Errorf("failed to get daemonsets in namespace %q: %v", namespace.Name, err)
-//            }
+		// statefulset
+		res.Stss, err = clientset.AppsV1().StatefulSets(namespace.Name).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("failed to get statefulsets in namespace %q: %v", namespace.Name, err)
+		}
+		// daemonset
+		//            res.Dss, err = clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
+		//            if err != nil {
+		//                    return nil, fmt.Errorf("failed to get daemonsets in namespace %q: %v", namespace.Name, err)
+		//            }
 
-            // deployment
-            res.Deploys, err = clientset.AppsV1().Deployments(namespace.Name).List(context.TODO(), metav1.ListOptions{})
-            if err != nil {
-                return nil, fmt.Errorf("failed to get deployments in namespace %q: %v", namespace.Name, err)
-            }
-            result = append(result, res)
-        }
+		// deployment
+		res.Deploys, err = clientset.AppsV1().Deployments(namespace.Name).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("failed to get deployments in namespace %q: %v", namespace.Name, err)
+		}
+		result = append(result, res)
+	}
 
-        return result, nil
+	return result, nil
 }
-
 
 // NewResources resturns Resources for the namespace
 func GetNamespaces(clientset kubernetes.Interface) (*corev1.NamespaceList, error) {
 	var err error
-        var namespaces *corev1.NamespaceList
+	var namespaces *corev1.NamespaceList
 
 	// namespaces
 	namespaces, err = clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
