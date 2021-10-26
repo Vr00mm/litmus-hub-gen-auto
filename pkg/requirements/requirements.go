@@ -1,14 +1,64 @@
 package requirements
+import "fmt"
 
 func checkIfRoot() (bool) {
   return false
 }
 
-func checkHaveLabels(composant interface{}) (bool) {
-    labels := []string{"composant"}
+func FindUniqueLabelsBb(composants map[string]map[string]string) (map[string][]string) {
+    unique := make(map[string][]string, len(composants))
+    for composant, o := range composants {
+        for labelName, labelValue := range o {
+            skip := false
+            label := fmt.Sprintf("%s=%s", labelName, labelValue )
+            for composantO, uo := range composants {
+                if composant != composantO {
+                    for labelNameO, labelValueO := range uo {
+                        labelO := fmt.Sprintf("%s=%s", labelNameO, labelValueO )
+                        if label == labelO {
+                            skip = true
+                        }
+                    }
+                }
+            }
+            if !skip {
+                unique[composant] = append(unique[composant], label)
+                //fmt.Printf("Valeur de unique: %v\n", unique)
+            }
+        }
+    }
+    return unique
+}
+
+func FindUniqueLabels(composants map[string]map[string]string) (map[string][]string) {
+    unique := make(map[string][]string, len(composants))
+    for composant, o := range composants {
+        skip := false
+        for ko, vo := range o {
+            labelValue := fmt.Sprintf("%s=%s", ko, vo )
+            for _, u := range unique {
+                for _, vu := range u {
+                    labelu := string(vu)
+                    if labelValue == labelu {
+                        skip = true
+                        break
+                    }
+                }
+            }
+            if !skip {
+                unique[composant] = append(unique[composant], labelValue)
+                //fmt.Printf("Valeur de unique: %v\n", unique)
+            }
+        }
+    }
+    return unique
+}
+
+func CheckHaveLabels(labels map[string]string) (bool) {
+    requiredLabels := []string{"composant"}
     compliant := true
-    for label := range labels {
-        if _, found := composant[label]; found != true {
+    for _, requiredLabel := range requiredLabels {
+        if _, found := labels[requiredLabel]; found != true {
             compliant = false
         }
     }

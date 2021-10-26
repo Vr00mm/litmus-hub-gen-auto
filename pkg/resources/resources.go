@@ -12,6 +12,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+//	"encoding/json"
 )
 
 var (
@@ -38,6 +39,7 @@ type Resources struct {
 	clientset kubernetes.Interface
 	Namespace string
 
+	Objects   []string
 	Svcs      *corev1.ServiceList
 	Pvcs      *corev1.PersistentVolumeClaimList
 	Pods      *corev1.PodList
@@ -70,7 +72,6 @@ func GetResources(clientset kubernetes.Interface) ([]*Resources, error) {
             if err != nil {
                     return nil, fmt.Errorf("failed to get statefulsets in namespace %q: %v", namespace.Name, err)
             }
-
             // daemonset
 //            res.Dss, err = clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
 //            if err != nil {
