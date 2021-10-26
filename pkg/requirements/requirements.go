@@ -6,7 +6,7 @@ func checkIfRoot() bool {
 	return false
 }
 
-func FindUniqueLabelsBb(composants map[string]map[string]string) map[string][]string {
+func FindUniqueLabels(composants map[string]map[string]string) map[string][]string {
 	unique := make(map[string][]string, len(composants))
 	for composant, o := range composants {
 		for labelName, labelValue := range o {
@@ -24,30 +24,6 @@ func FindUniqueLabelsBb(composants map[string]map[string]string) map[string][]st
 			}
 			if !skip {
 				unique[composant] = append(unique[composant], label)
-				//fmt.Printf("Valeur de unique: %v\n", unique)
-			}
-		}
-	}
-	return unique
-}
-
-func FindUniqueLabels(composants map[string]map[string]string) map[string][]string {
-	unique := make(map[string][]string, len(composants))
-	for composant, o := range composants {
-		skip := false
-		for ko, vo := range o {
-			labelValue := fmt.Sprintf("%s=%s", ko, vo)
-			for _, u := range unique {
-				for _, vu := range u {
-					labelu := string(vu)
-					if labelValue == labelu {
-						skip = true
-						break
-					}
-				}
-			}
-			if !skip {
-				unique[composant] = append(unique[composant], labelValue)
 				//fmt.Printf("Valeur de unique: %v\n", unique)
 			}
 		}
