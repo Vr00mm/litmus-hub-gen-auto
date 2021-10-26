@@ -9,6 +9,8 @@ import (
 	//        "hub-gen-auto/pkg/experiments"
 )
 
+var experimentList = []string{"container-kill", "test-123"}
+
 type Workflow struct {
 	Name        string   `yaml:"name"`
 	Experiments []string `yaml:"experiments"`
@@ -37,21 +39,21 @@ type Projects struct {
 	Namespaces 	[]Hub  `yaml:"namespaces"`
 }
 
-func generateExperiment(experimentName, composant){
+func generateExperiment(experimentName string, composant resources.Object) (Experiment){
 	var experiment Experiment
-        experiment.Name := composant.Name
-        experiment.Template := experimentName
-	experiment.Label := composant.Label
-	experiment.Kind := composant.Kind
-	experiment.Args := composant.Args
+        experiment.Name = "test"
+        experiment.Template = experimentName
+	experiment.Label = "test"
+	experiment.Kind = composant.Type
+	experiment.Args = "test"
 	return experiment
 }
 
-func generateExperiments(composants []*resources.Resources, experiments []string){
+func generateExperiments(composants *resources.Resources, experimentsList []string){
 	var experiments []Experiment
-	for _, experimentName := range experiments {
-		for _, composant := range composants {
-			ready := requirements.checkRequirements(experimentName, composant)
+	for _, experimentName := range experimentsList {
+		for _, composant := range composants.Objects {
+			ready := requirements.CheckRequirements(experimentName, composant)
 			if !ready {
 				continue
 			}
@@ -66,25 +68,19 @@ func Generate(clusterName string, res []*resources.Resources) {
 	projects.ClusterName = clusterName
 
 	for _, namespace := range res {
-		targetLabels := make(map[string]map[string]string, len(namespace.Deploys.Items))
-		for _, composant := range namespace.Deploys.Items {
-			ready := requirements.CheckHaveLabels(composant.ObjectMeta.Labels)
-			if ready == true {
-				targetLabels[composant.Name] = make(map[string]string, len(composant.ObjectMeta.Labels))
-				targetLabels[composant.Name] = composant.ObjectMeta.Labels
-			}
-		}
-		for _, composant := range namespace.Stss.Items {
-			ready := requirements.CheckHaveLabels(composant.ObjectMeta.Labels)
-			if ready == true {
-				targetLabels[composant.Name] = make(map[string]string, len(composant.ObjectMeta.Labels))
-				targetLabels[composant.Name] = composant.ObjectMeta.Labels
-			}
+
+                ready, err := requirements.CheckHaveLabels(namespace, []string{"composant"})
+                if !ready {
+	                fmt.Printf("Erreur lors de la vérification des labels: %v\n", err)
+                        continue
+                }
+
+
+		targetLabels, err := requirements.FindUniqueLabels(namespace)
+		if err != nil {
 		}
 
-		newVar := requirements.FindUniqueLabels(targetLabels)
-
-		if len(namespace.Deploys.Items)+len(namespace.Stss.Items) == len(newVar) && len(newVar) > 0 {
+		if len(namespace.Objects) == len(targetLabels) && len(targetLabels) > 0 {
 			skip := true
 			for _, labels := range newVar {
 				for _, label := range labels {
@@ -106,17 +102,17 @@ func Generate(clusterName string, res []*resources.Resources) {
                 fmt.Printf("Lancement de la génération des experiments.\n")
 
 		var experiments []Experiment
-		experiments = generateExperiments(res, newVar)
+		experiments = generateExperiments(namespace, experimentsList)
                 fmt.Printf("Génération des experiments terminée.\n")
 
                 fmt.Printf("Lancement de la génération des workflows.\n")
 		var workflows []Workflow
-		workflows = generateWorkflows(res, newVar)
+		workflows = generateWorkflows(namespace, workflowsList)
                 fmt.Printf("Génération des workflows terminée.\n")
 
                 fmt.Printf("Packaging du hub.\n")
                 var hub Hub
-                hub = generateHub(res, experiments, workflows)
+                hub = generateHub(namespace, experiments, workflows)
                 fmt.Printf("Packaging terminé.\n")
 
 

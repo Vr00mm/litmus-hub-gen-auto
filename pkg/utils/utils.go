@@ -1,6 +1,7 @@
 package main
 
 import "fmt"
+import "github.com/buger/jsonparser"
 
 func getLabel(o map[string]string, label string) string {
 	if _, found := o[label]; found {
@@ -8,6 +9,7 @@ func getLabel(o map[string]string, label string) string {
 	}
 	return ""
 }
+
 
 func writeArrayToFile(sampledata []string, outfile string) {
 	file, err := os.OpenFile(outfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

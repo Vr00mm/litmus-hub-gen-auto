@@ -1,10 +1,13 @@
 package requirements
 
 import "fmt"
+import "hub-gen-auto/pkg/resources"
 
-func checkIfRoot() bool {
+func checkIfRoot(composant interface{}) bool {
 	return false
 }
+
+
 
 func FindUniqueLabels(composants map[string]map[string]string) map[string][]string {
 	unique := make(map[string][]string, len(composants))
@@ -31,23 +34,25 @@ func FindUniqueLabels(composants map[string]map[string]string) map[string][]stri
 	return unique
 }
 
-func CheckHaveLabels(labels map[string]string) bool {
-	requiredLabels := []string{"composant"}
-	compliant := true
-	for _, requiredLabel := range requiredLabels {
-		if _, found := labels[requiredLabel]; found != true {
-			compliant = false
-		}
-	}
+func CheckHaveLabels(namespace resources.Resources, requiredLabels []string) bool {
+        compliant := true
+	fmt.Printf("TRACE: %v", namespace)
+        for _, composant := range namespace.Objects {
+	        for _, requiredLabel := range requiredLabels {
+        	        if _, found := composant.GetLabel(requiredLabel); found != true {
+                	        compliant = false
+                	}
+        	}
+        }
 	return compliant
 }
 
-func CheckRequirements(requirements []string) bool {
+func CheckRequirements(requirements []string, composant resources.Object) bool {
 	compliant := true
 	for _, requirement := range requirements {
 		switch requirement {
 		case "isRoot":
-			result := checkIfRoot()
+			result := checkIfRoot(composant)
 			if result != true {
 				compliant = false
 			}

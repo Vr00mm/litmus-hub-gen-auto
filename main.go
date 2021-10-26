@@ -85,7 +85,7 @@ func main() {
 			continue
 		}
 
-		generator.Generate(clusterName, results)
+//		generator.Generate(clusterName, results)
 	}
 	os.Exit(0)
 
