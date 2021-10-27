@@ -13,28 +13,12 @@ import (
 //	"byte"
 )
 
-var (
-	// ResourceTypes represents the set of resource types.
-	// Resouces are grouped by the same level of abstraction.
-	ResourceTypes   = []string{"hpa cronjob", "deploy job", "sts ds rs", "pod", "pvc", "svc", "ing"}
-	normalizedNames = map[string]string{
-		"ns":      "namespace",
-		"svc":     "service",
-		"pvc":     "persistentvolumeclaim",
-		"pod":     "po",
-		"sts":     "statefulset",
-		"ds":      "daemonset",
-		"rs":      "replicaset",
-		"deploy":  "deployment",
-		"job":     "job",
-		"cronjob": "cj",
-		"ing":     "ingress",
-		"hpa":     "horizontalpodautoscaler"}
-)
 
 type Object struct {
 	Type		string
 	JsonData	string
+	UniqueLabels	[]string
+	GeneratedExperiments	[]string
 }
 
 // Resources represents the k8s resources
@@ -44,12 +28,51 @@ type Resources struct {
 	Objects   []Object
 }
 
+func (obj *Object) GetUniqueLabel() string {
+        return obj.UniqueLabels[0]
+}
+
+func (obj *Object) AddGeneratedExperiment(experimentName string) {
+        obj.GeneratedExperiments = append(obj.GeneratedExperiments, experimentName)
+}
+
+func (obj *Object) AddUniqueLabel(label string) {
+	obj.UniqueLabels = append(obj.UniqueLabels, label)
+}
+
+func (obj *Object) GetLabels() (map[string]string) {
+	var results map[string]string
+        if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels"); err == nil {
+                json.Unmarshal(data, &results)
+		return results
+        }
+	return results
+}
+
+func (obj *Object) GetName() (string) {
+        var data []byte
+	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "name"); err == nil {
+                return string(data)
+        }
+	return string(data)
+}
+
 func (obj *Object) GetLabel(label string) (string, bool) {
-	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "person", "name", label); err == nil {
+	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels", label); err == nil {
  		return string(data), true
 	}
 	return "", false
 }
+
+func (obj *Object) GetContainers() ([]string, bool) {
+	var results []string
+	jsonparser.ArrayEach([]byte(obj.JsonData), func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		data, _, _, _ := jsonparser.Get(value, "name")
+		results = append(results, string(data))
+	}, "spec", "template", "spec", "containers")
+	return results, true
+}
+
 
 // NewResources resturns Resources for the namespace
 func GetResources(clientset kubernetes.Interface) ([]*Resources, error) {

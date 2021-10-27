@@ -5,118 +5,109 @@ import (
 	//        "encoding/json"
 	"hub-gen-auto/pkg/requirements"
 	"hub-gen-auto/pkg/resources"
-	"strings"
-	//        "hub-gen-auto/pkg/experiments"
+        "hub-gen-auto/pkg/types"
+
+//	"strings"
+	containerKill "hub-gen-auto/pkg/experiments/container-kill"
 )
 
-var experimentList = []string{"container-kill", "test-123"}
+var experimentsList = []string{"container-kill"}
 
-type Workflow struct {
-	Name        string   `yaml:"name"`
-	Experiments []string `yaml:"experiments"`
-}
-
-type Experiment struct {
-	Name      string      `yaml:"name"`
-	Template  string      `yaml:"template"`
-	Label     string      `yaml:"label"`
-	Kind      string      `yaml:"kind"`
-	Args      interface{} `yaml:"args"`
-}
-
-type Hub struct {
-	Name        string       `yaml:"name"`
-	Description string       `yaml:"description"`
-	Namespace   string       `yaml:"namespace"`
-	Platform    string       `yaml:"platform"`
-	GitURL      string       `yaml:"gitUrl"`
-	Workflows   []Workflow   `yaml:"workflows"`
-	Experiments []Experiment `yaml:"experiments"`
-}
-
-type Projects struct {
-	ClusterName    	string `yaml:"cluster_name"`
-	Namespaces 	[]Hub  `yaml:"namespaces"`
-}
-
-func generateExperiment(experimentName string, composant resources.Object) (Experiment){
-	var experiment Experiment
-        experiment.Name = "test"
-        experiment.Template = experimentName
-	experiment.Label = "test"
-	experiment.Kind = composant.Type
-	experiment.Args = "test"
-	return experiment
-}
-
-func generateExperiments(composants *resources.Resources, experimentsList []string){
-	var experiments []Experiment
-	for _, experimentName := range experimentsList {
-		for _, composant := range composants.Objects {
-			ready := requirements.CheckRequirements(experimentName, composant)
-			if !ready {
-				continue
-			}
-			experiment := generateExperiment(experimentName, composant)
+func generateWorkflows(composants *resources.Resources) ([]types.Workflow){
+        var workflows []types.Workflow
+	var experiments []string
+        for _, composant := range composants.Objects {
+                var workflow types.Workflow
+		for _, experiment := range composant.GeneratedExperiments {
 			experiments = append(experiments, experiment)
 		}
-	}
+                workflows = append(workflows, workflow)
+        }
+        return workflows
+
 }
 
-func Generate(clusterName string, res []*resources.Resources) {
-	var projects Projects
-	projects.ClusterName = clusterName
+
+func generateExperiment(experimentName string, composant resources.Object) ([]types.Experiment){
+	var experiments []types.Experiment
+	switch experimentName {
+	case "container-kill":
+		exps := containerKill.Generate(composant)
+		for _, exp := range exps {
+			experiments = append(experiments, exp)
+		}
+		return experiments
+
+	default:
+		fmt.Printf("Unsupported experiment %v, please provide the correct value of experiment\n", experimentName)
+		return experiments
+	}
+
+}
+
+func generateExperiments(composants *resources.Resources, experimentsList []string) (*resources.Resources, []types.Experiment) {
+	var experiments []types.Experiment
+	var objs []resources.Object
+	for _, experimentName := range experimentsList {
+		for _, composant := range composants.Objects {
+			exps := generateExperiment(experimentName, composant)
+			for _, experiment := range exps {
+				experiments = append(experiments, experiment)
+				composant.AddGeneratedExperiment(experiment.Name)
+				objs = append(objs, composant)
+			}
+		}
+	}
+	composants.Objects = objs
+	return composants, experiments
+}
+
+func Generate(clusterName string, res []*resources.Resources) ([]types.Manifest) {
+	var projects []types.Manifest
 
 	for _, namespace := range res {
-
                 ready, err := requirements.CheckHaveLabels(namespace, []string{"composant"})
                 if !ready {
-	                fmt.Printf("Erreur lors de la vérification des labels: %v\n", err)
+	                fmt.Printf("Cannot find labels in namespace :\n %v \n", namespace.Namespace)
                         continue
                 }
 
 
-		targetLabels, err := requirements.FindUniqueLabels(namespace)
-		if err != nil {
-		}
+		namespace, compliant := requirements.FindUniqueLabels(namespace)
+		if !compliant {
+                        fmt.Printf("Cannot find determinist labels in namespace %v : %v\n", namespace.Namespace, err)
+                        continue
 
-		if len(namespace.Objects) == len(targetLabels) && len(targetLabels) > 0 {
-			skip := true
-			for _, labels := range newVar {
-				for _, label := range labels {
-					if strings.HasPrefix(label, "composant") {
-						skip = false
-					}
-				}
-			}
-			if skip {
-				fmt.Printf("Le namespace %s n'est pret pour le chaos: %s\n", namespace.Namespace)
-				continue
-			}
-		} else {
-                                fmt.Printf("Le namespace %s n'est pret pour le chaos: %s\n", namespace.Namespace)
-                                continue
 		}
-                fmt.Printf("Le namespace %s est pret pour le chaos: %s\n", namespace.Namespace)
 
                 fmt.Printf("Lancement de la génération des experiments.\n")
+		var experiments []types.Experiment
+		namespace, experiments = generateExperiments(namespace, experimentsList)
+                if len(experiments) < 1 {
+                        fmt.Printf("Cannot generate experiments for: %v\n", namespace.Namespace)
+                        continue
+		}
 
-		var experiments []Experiment
-		experiments = generateExperiments(namespace, experimentsList)
-                fmt.Printf("Génération des experiments terminée.\n")
+		fmt.Printf("Génération des experiments terminée.\n")
 
                 fmt.Printf("Lancement de la génération des workflows.\n")
-		var workflows []Workflow
-		workflows = generateWorkflows(namespace, workflowsList)
+		var workflows []types.Workflow
+		workflows = generateWorkflows(namespace)
                 fmt.Printf("Génération des workflows terminée.\n")
 
                 fmt.Printf("Packaging du hub.\n")
-                var hub Hub
-                hub = generateHub(namespace, experiments, workflows)
+
+                var project types.Manifest
+	        project.Name    = clusterName +"-"+ namespace.Namespace
+        	project.Description = "Experiments and workflow for namespace " +namespace.Namespace+" on cluster " + clusterName
+	        project.Platform = clusterName
+		project.Experiments = experiments
+		project.Workflows = workflows
                 fmt.Printf("Packaging terminé.\n")
 
-
+		projects = append(projects, project)
 	}
+	return projects
 
 	//	file, _ := json.MarshalIndent(manifest, "", " ")
 	//	fmt.Println(string(file))

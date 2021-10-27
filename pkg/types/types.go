@@ -9,12 +9,11 @@ type Experiment struct {
 	Name      string      `yaml:"name"`
 	Template  string      `yaml:"template"`
 	Label     string      `yaml:"label"`
-	Composant string      `yaml:"composant"`
 	Kind      string      `yaml:"kind"`
 	Args      interface{} `yaml:"args"`
 }
 
-type Manifests []struct {
+type Manifest struct {
 	Name        string       `yaml:"name"`
 	Description string       `yaml:"description"`
 	Namespace   string       `yaml:"namespace"`

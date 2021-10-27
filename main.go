@@ -6,10 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+        "encoding/json"
 
 	"hub-gen-auto/pkg/clients"
-	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
+        "hub-gen-auto/pkg/generator"
+
 )
 
 const (
@@ -85,7 +87,12 @@ func main() {
 			continue
 		}
 
-//		generator.Generate(clusterName, results)
+		test := generator.Generate(clusterName, results)
+		c, err := json.Marshal(test)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(string(c))
 	}
 	os.Exit(0)
 
