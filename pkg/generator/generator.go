@@ -66,11 +66,11 @@ func Generate(clusterName string, res []*resources.Resources) ([]types.Manifest)
 	var projects []types.Manifest
 
 	for _, namespace := range res {
-                ready, err := requirements.CheckHaveLabels(namespace, []string{"composant"})
-                if !ready {
-	                fmt.Printf("Cannot find labels in namespace :\n %v \n", namespace.Namespace)
-                        continue
-                }
+                //ready, err := requirements.CheckHaveLabels(namespace, []string{"composant"})
+                //if !ready {
+	        //        fmt.Printf("Cannot find labels in namespace :\n %v \n", namespace.Namespace)
+                //        continue
+                //}
 
 
 		namespace, compliant := requirements.FindUniqueLabels(namespace)
