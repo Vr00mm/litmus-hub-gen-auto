@@ -1,6 +1,7 @@
 package containerKill
 
 import (
+	"fmt"
 	"hub-gen-auto/pkg/requirements"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/types"
@@ -27,8 +28,9 @@ func generateContainerKill(composant resources.Object, container string) types.E
 func Generate(composant resources.Object) []types.Experiment {
 	var experiments []types.Experiment
 	containers, _ := composant.GetContainers()
-	for _, container := range containers {
-		exp := generateContainerKill(composant, container)
+	fmt.Printf("Le composant: %s a comme containers %v\n", composant.GetName(), containers)
+	for container := range containers {
+		exp := generateContainerKill(composant, containers[container])
 		experiments = append(experiments, exp)
 	}
 	return experiments

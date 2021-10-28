@@ -20,7 +20,7 @@ func generateWorkflows(composants *resources.Resources) []types.Workflow {
 	for _, composant := range composants.Objects {
 		var workflow types.Workflow
 		for experiment := range composant.GeneratedExperiments {
-			experiments = append(experiments, experiments[experiment])
+			experiments = append(experiments, composant.GeneratedExperiments[experiment])
 		}
 		workflow.Experiments = experiments
 		workflow.Name = composants.Namespace + "-" + composant.GetName()

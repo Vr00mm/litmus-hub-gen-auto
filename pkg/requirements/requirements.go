@@ -1,8 +1,10 @@
 package requirements
 
-import "fmt"
-import "strings"
-import "hub-gen-auto/pkg/resources"
+import (
+	"fmt"
+	"hub-gen-auto/pkg/resources"
+	"strings"
+)
 
 //import "hub-gen-auto/pkg/types"
 
@@ -15,12 +17,12 @@ func FindUniqueLabels(composants *resources.Resources) (*resources.Resources, bo
 	result := composants
 	var dirty []resources.Object
 	ready := true
-	for _, composant := range composants.Objects {
-		for labelName, labelValue := range composant.GetLabels() {
+	for composant := range composants.Objects {
+		for labelName, labelValue := range composants.Objects[composant].GetLabels() {
 			skip := false
 			label := fmt.Sprintf("%s=%s", labelName, labelValue)
 			for _, composantO := range composants.Objects {
-				if composant.GetName() != composantO.GetName() {
+				if string(composants.Objects[composant].GetName()) != string(composantO.GetName()) {
 					for labelNameO, labelValueO := range composantO.GetLabels() {
 						labelO := fmt.Sprintf("%s=%s", labelNameO, labelValueO)
 						if label == labelO {
@@ -30,13 +32,14 @@ func FindUniqueLabels(composants *resources.Resources) (*resources.Resources, bo
 				}
 			}
 			if !skip {
-				unique[composant.GetName()] = append(unique[composant.GetName()], label)
-				composant.AddUniqueLabel(label)
-				dirty = append(dirty, composant)
+				unique[composants.Objects[composant].GetName()] = append(unique[composants.Objects[composant].GetName()], label)
+				composants.Objects[composant].AddUniqueLabel(label)
 			}
 		}
-		if len(unique[composant.GetName()]) < 1 {
+		if len(unique[composants.Objects[composant].GetName()]) < 1 {
 			ready = false
+		} else {
+			dirty = append(dirty, composants.Objects[composant])
 		}
 	}
 	result.Objects = dirty
@@ -49,7 +52,7 @@ func CheckHaveLabels(namespace *resources.Resources, requiredLabels []string) (b
 	//	fmt.Printf("TRACE: %v", namespace)
 	for _, composant := range namespace.Objects {
 		for _, requiredLabel := range requiredLabels {
-			if _, found := composant.GetLabel(requiredLabel); found != true {
+			if _, found := composant.GetLabel(requiredLabel); !found {
 				compliant = false
 				msg := "Label " + requiredLabel + " not found on "
 				err = append(err, msg)
@@ -64,8 +67,8 @@ func CheckRequirements(requirements []string, composant resources.Object) bool {
 	for _, requirement := range requirements {
 		switch requirement {
 		case "isRoot":
-			result := checkIfRoot(composant)
-			if result != true {
+			isRoot := checkIfRoot(composant)
+			if !isRoot {
 				compliant = false
 			}
 		}
