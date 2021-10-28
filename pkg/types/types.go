@@ -6,11 +6,11 @@ type Workflow struct {
 }
 
 type Experiment struct {
-	Name      string      `yaml:"name"`
-	Template  string      `yaml:"template"`
-	Label     string      `yaml:"label"`
-	Kind      string      `yaml:"kind"`
-	Args      interface{} `yaml:"args"`
+	Name     string      `yaml:"name"`
+	Template string      `yaml:"template"`
+	Label    string      `yaml:"label"`
+	Kind     string      `yaml:"kind"`
+	Args     interface{} `yaml:"args"`
 }
 
 type Manifest struct {

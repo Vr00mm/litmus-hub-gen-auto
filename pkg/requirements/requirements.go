@@ -3,13 +3,12 @@ package requirements
 import "fmt"
 import "strings"
 import "hub-gen-auto/pkg/resources"
+
 //import "hub-gen-auto/pkg/types"
 
 func checkIfRoot(composant interface{}) bool {
 	return false
 }
-
-
 
 func FindUniqueLabels(composants *resources.Resources) (*resources.Resources, bool) {
 	unique := make(map[string][]string, len(composants.Objects))
@@ -45,18 +44,18 @@ func FindUniqueLabels(composants *resources.Resources) (*resources.Resources, bo
 }
 
 func CheckHaveLabels(namespace *resources.Resources, requiredLabels []string) (bool, string) {
-        compliant := true
+	compliant := true
 	var err []string
-//	fmt.Printf("TRACE: %v", namespace)
-        for _, composant := range namespace.Objects {
-	        for _, requiredLabel := range requiredLabels {
-        	        if _, found := composant.GetLabel(requiredLabel); found != true {
-                	        compliant = false
+	//	fmt.Printf("TRACE: %v", namespace)
+	for _, composant := range namespace.Objects {
+		for _, requiredLabel := range requiredLabels {
+			if _, found := composant.GetLabel(requiredLabel); found != true {
+				compliant = false
 				msg := "Label " + requiredLabel + " not found on "
 				err = append(err, msg)
-                	}
-        	}
-        }
+			}
+		}
+	}
 	return compliant, strings.Join(err, "\n")
 }
 

@@ -1,17 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-        "encoding/json"
 
 	"hub-gen-auto/pkg/clients"
+	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
-        "hub-gen-auto/pkg/generator"
-
 )
 
 const (

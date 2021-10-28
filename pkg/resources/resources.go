@@ -3,22 +3,21 @@ package resources
 import (
 	"context"
 	"fmt"
-//	appsv1 "k8s.io/api/apps/v1"
+	//	appsv1 "k8s.io/api/apps/v1"
+	"encoding/json"
+	"github.com/buger/jsonparser"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"os"
-	"encoding/json"
-	"github.com/buger/jsonparser"
-//	"byte"
+	//	"byte"
 )
 
-
 type Object struct {
-	Type		string
-	JsonData	string
-	UniqueLabels	[]string
-	GeneratedExperiments	[]string
+	Type                 string
+	JsonData             string
+	UniqueLabels         []string
+	GeneratedExperiments []string
 }
 
 // Resources represents the k8s resources
@@ -29,37 +28,37 @@ type Resources struct {
 }
 
 func (obj *Object) GetUniqueLabel() string {
-        return obj.UniqueLabels[0]
+	return obj.UniqueLabels[0]
 }
 
 func (obj *Object) AddGeneratedExperiment(experimentName string) {
-        obj.GeneratedExperiments = append(obj.GeneratedExperiments, experimentName)
+	obj.GeneratedExperiments = append(obj.GeneratedExperiments, experimentName)
 }
 
 func (obj *Object) AddUniqueLabel(label string) {
 	obj.UniqueLabels = append(obj.UniqueLabels, label)
 }
 
-func (obj *Object) GetLabels() (map[string]string) {
+func (obj *Object) GetLabels() map[string]string {
 	var results map[string]string
-        if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels"); err == nil {
-                json.Unmarshal(data, &results)
+	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels"); err == nil {
+		json.Unmarshal(data, &results)
 		return results
-        }
+	}
 	return results
 }
 
-func (obj *Object) GetName() (string) {
-        var data []byte
+func (obj *Object) GetName() string {
+	var data []byte
 	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "name"); err == nil {
-                return string(data)
-        }
+		return string(data)
+	}
 	return string(data)
 }
 
 func (obj *Object) GetLabel(label string) (string, bool) {
 	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels", label); err == nil {
- 		return string(data), true
+		return string(data), true
 	}
 	return "", false
 }
@@ -72,7 +71,6 @@ func (obj *Object) GetContainers() ([]string, bool) {
 	}, "spec", "template", "spec", "containers")
 	return results, true
 }
-
 
 // NewResources resturns Resources for the namespace
 func GetResources(clientset kubernetes.Interface) ([]*Resources, error) {
@@ -104,26 +102,26 @@ func GetResources(clientset kubernetes.Interface) ([]*Resources, error) {
 			var object Object
 			jsonData, err := json.Marshal(statefulset)
 			if err != nil {
-			    fmt.Println(err)
-			    continue
+				fmt.Println(err)
+				continue
 			}
-                        object.Type = "statefulset"
+			object.Type = "statefulset"
 			object.JsonData = string(jsonData)
 			res.Objects = append(res.Objects, object)
 		}
 
-                for _, deployment := range deployments.Items {
-                        var object Object
-                        jsonData, err := json.Marshal(deployment)
-                        if err != nil {
-                            fmt.Println(err)
-                            continue
-                        }
-                        object.Type = "deployment"
+		for _, deployment := range deployments.Items {
+			var object Object
+			jsonData, err := json.Marshal(deployment)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			object.Type = "deployment"
 			object.JsonData = string(jsonData)
 
-                        res.Objects = append(res.Objects, object)
-                }
+			res.Objects = append(res.Objects, object)
+		}
 		result = append(result, res)
 
 	}

@@ -14,11 +14,11 @@ func checkRequirements(composant resources.Object) bool {
 
 func generatePodKill(composant resources.Object) types.Experiment {
 	var experiment types.Experiment
-        experiment.Name = "pod-kill-" +composant.Type+"-"+composant.GetName()
-        experiment.Template = "pod-kill"
-        experiment.Label = composant.GetUniqueLabel()
-        experiment.Kind = composant.Type
-        return experiment
+	experiment.Name = "pod-kill-" + composant.Type + "-" + composant.GetName()
+	experiment.Template = "pod-kill"
+	experiment.Label = composant.GetUniqueLabel()
+	experiment.Kind = composant.Type
+	return experiment
 }
 
 func Generate(composant resources.Object) []types.Experiment {
