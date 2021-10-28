@@ -9,9 +9,11 @@ import (
 
 //	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
+        podKill "hub-gen-auto/pkg/experiments/pod-kill"
+
 )
 
-var experimentsList = []string{"container-kill"}
+var experimentsList = []string{"container-kill", "pod-kill"}
 
 func generateWorkflows(composants *resources.Resources) ([]types.Workflow){
         var workflows []types.Workflow
@@ -21,6 +23,8 @@ func generateWorkflows(composants *resources.Resources) ([]types.Workflow){
 		for _, experiment := range composant.GeneratedExperiments {
 			experiments = append(experiments, experiment)
 		}
+		workflow.Experiments = experiments
+		workflow.Name = composants.Namespace + "-" + composant.GetName()
                 workflows = append(workflows, workflow)
         }
         return workflows
@@ -37,7 +41,12 @@ func generateExperiment(experimentName string, composant resources.Object) ([]ty
 			experiments = append(experiments, exp)
 		}
 		return experiments
-
+        case "pod-kill":
+                exps := podKill.Generate(composant)
+                for _, exp := range exps {
+                        experiments = append(experiments, exp)
+                }
+                return experiments
 	default:
 		fmt.Printf("Unsupported experiment %v, please provide the correct value of experiment\n", experimentName)
 		return experiments
@@ -72,13 +81,14 @@ func Generate(clusterName string, res []*resources.Resources) ([]types.Manifest)
                 //        continue
                 //}
 
-
+		fmt.Printf("before the shet: %v \n\n", namespace)
 		namespace, compliant := requirements.FindUniqueLabels(namespace)
 		if !compliant {
-                        fmt.Printf("Cannot find determinist labels in namespace %v : %v\n", namespace.Namespace, err)
+                        fmt.Printf("Cannot find determinist labels in namespace %v : %v\n", namespace.Namespace)
                         continue
 
 		}
+		fmt.Printf("here is the shet: %v\n\n\n", namespace)
 
                 fmt.Printf("Lancement de la génération des experiments.\n")
 		var experiments []types.Experiment
