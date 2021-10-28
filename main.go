@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -10,6 +9,8 @@ import (
 
 	"hub-gen-auto/pkg/clients"
 	"hub-gen-auto/pkg/generator"
+	"hub-gen-auto/pkg/templator"
+	"hub-gen-auto/pkg/builder"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/utils"
 )
@@ -89,12 +90,23 @@ func main() {
 			continue
 		}
 
-		test := generator.Generate(clusterName, results)
-		c, err := json.Marshal(test)
+		manifest, err := generator.Generate(clusterName, results)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintf(os.Stderr, "Cannot generate experiments parameters: %v\n", err)
+			continue
 		}
-		fmt.Println(string(c))
+
+		templates, err := templator.Template(manifest)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot templates experiments: %v\n", err)
+			continue
+		}
+
+		err := builder.Build(templates)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot write experiments to disk: %v\n", err)
+			continue
+		}
 	}
 	os.Exit(0)
 
