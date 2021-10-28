@@ -11,6 +11,7 @@ import (
 	"hub-gen-auto/pkg/clients"
 	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
+	"hub-gen-auto/pkg/utils"
 )
 
 const (
@@ -45,6 +46,8 @@ var (
 )
 
 func init() {
+
+	utils.WriteArrayToFile([]string{"ligne1", "ligne2"}, "data.csv")
 	var kubeconfig string
 	if kubeconfigEnv := os.Getenv("KUBECONFIG"); kubeconfigEnv != "" {
 		kubeconfigs = strings.Split(kubeconfigEnv, ":")

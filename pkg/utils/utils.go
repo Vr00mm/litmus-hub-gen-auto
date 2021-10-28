@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func writeArrayToFile(sampledata []string, outfile string) {
+func WriteArrayToFile(sampledata []string, outfile string) {
 	file, err := os.OpenFile(outfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		dbg := strings.Join(sampledata, "\n")
