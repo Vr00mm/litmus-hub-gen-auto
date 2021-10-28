@@ -9,6 +9,29 @@ import (
 
 var experimentRequirements = []string{"isRoot"}
 
+var availableLibs = []string{"litmus", "pumba"}
+
+var config = map[string]string{
+	"Name": "container-kill",
+	"Description": ``,
+
+}
+
+var parameters = map[string]string{
+			"TARGET_CONTAINER": "",
+			"RAMP_TIME": "",
+			"LIB": "litmus",
+			"TARGET_PODS": "",
+			"CHAOS_INTERVAL": "10",
+			"SIGNAL": "SIGKILL",
+			"SOCKET_PATH": "/var/run/docker.sock",
+			"CONTAINER_RUNTIME": "docker",
+			"TOTAL_CHAOS_DURATION": "60",
+			"PODS_AFFECTED_PERC": "",
+			"LIB_IMAGE": "litmuschaos/go-runner:latest",
+			"SEQUENCE": "parallel",
+}
+
 func checkRequirements(composant resources.Object) bool {
 	return requirements.CheckRequirements(experimentRequirements, composant)
 }

@@ -12,10 +12,7 @@ func checkIfRoot(composant interface{}) bool {
 	return false
 }
 
-func FindUniqueLabels(composants *resources.Resources) (*resources.Resources, bool) {
-	unique := make(map[string][]string, len(composants.Objects))
-	result := composants
-	var dirty []resources.Object
+func FindUniqueLabels(composants *resources.Resources) bool {
 	ready := true
 	for composant := range composants.Objects {
 		for labelName, labelValue := range composants.Objects[composant].GetLabels() {
@@ -27,23 +24,17 @@ func FindUniqueLabels(composants *resources.Resources) (*resources.Resources, bo
 						labelO := fmt.Sprintf("%s=%s", labelNameO, labelValueO)
 						if label == labelO {
 							skip = true
+							ready = false
 						}
 					}
 				}
 			}
 			if !skip {
-				unique[composants.Objects[composant].GetName()] = append(unique[composants.Objects[composant].GetName()], label)
 				composants.Objects[composant].AddUniqueLabel(label)
 			}
 		}
-		if len(unique[composants.Objects[composant].GetName()]) < 1 {
-			ready = false
-		} else {
-			dirty = append(dirty, composants.Objects[composant])
-		}
 	}
-	result.Objects = dirty
-	return result, ready
+	return ready
 }
 
 func CheckHaveLabels(namespace *resources.Resources, requiredLabels []string) (bool, string) {
