@@ -1,6 +1,16 @@
 package types
 
-type LitmusChartVersion struct {
+type ChaosChart struct {
+	ChartVersion    ChaosChartVersion
+	ChaosEngine     ChaosEngine
+	ChaosExperiment ChaosExperiment
+	Icon			[]byte
+}
+
+type ChaosEngine struct {
+}
+
+type ChaosChartVersion struct {
 	APIVersion string `yaml:"apiVersion"`
 	Kind       string `yaml:"kind"`
 	Metadata   struct {
@@ -43,8 +53,7 @@ type LitmusChartVersion struct {
 	} `yaml:"spec"`
 }
 
-
-type LitmusExperiment struct {
+type ChaosExperiment struct {
 	APIVersion string `yaml:"apiVersion"`
 	Kind       string `yaml:"kind"`
 	Metadata   struct {

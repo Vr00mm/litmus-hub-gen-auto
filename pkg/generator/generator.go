@@ -6,6 +6,7 @@ import (
 	"hub-gen-auto/pkg/requirements"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/types"
+	"hub-gen-auto/pkg/utils"
 
 	//	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
@@ -13,6 +14,11 @@ import (
 )
 
 var experimentsList = []string{"container-kill", "pod-kill"}
+var experimentsManifests map[string]types.ChaosChart
+
+func init() {
+	experimentsManifests = utils.GetExperimentsManifests(experimentsList)
+}
 
 func generateWorkflows(composants *resources.Resources) []types.Workflow {
 	var workflows []types.Workflow
@@ -30,8 +36,8 @@ func generateWorkflows(composants *resources.Resources) []types.Workflow {
 
 }
 
-func generateExperiment(experimentName string, composant resources.Object) []types.Experiment {
-	var experiments []types.Experiment
+func generateExperiment(experimentName string, composant resources.Object) []types.ChaosChart {
+	var experiments []types.ChaosChart
 	switch experimentName {
 	case "container-kill":
 		exps := containerKill.Generate(composant)
