@@ -9,8 +9,6 @@ import (
 
 	"hub-gen-auto/pkg/clients"
 	"hub-gen-auto/pkg/generator"
-	"hub-gen-auto/pkg/templator"
-	"hub-gen-auto/pkg/builder"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/utils"
 )
@@ -44,6 +42,7 @@ var (
 	sockerPath       string
 	containerPath    string
 	experimentLib    string
+	ChaosExperiments string
 )
 
 func init() {
@@ -101,12 +100,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Cannot templates experiments: %v\n", err)
 			continue
 		}
+		_ = templates
 
-		err := builder.Build(templates)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot write experiments to disk: %v\n", err)
-			continue
-		}
 	}
 	os.Exit(0)
 
