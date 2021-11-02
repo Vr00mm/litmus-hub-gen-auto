@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"encoding/json"
+	"io/ioutil"
+
 	"hub-gen-auto/pkg/clients"
 	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
@@ -95,13 +98,9 @@ func main() {
 			continue
 		}
 
-		templates, err := templator.Template(manifest)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot templates experiments: %v\n", err)
-			continue
-		}
-		_ = templates
+		file, _ := json.MarshalIndent(manifest, "", " ")
 
+		_ = ioutil.WriteFile("test.json", file, 0644)
 	}
 	os.Exit(0)
 

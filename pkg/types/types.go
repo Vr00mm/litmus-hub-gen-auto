@@ -4,10 +4,123 @@ type ChaosChart struct {
 	ChartVersion    ChaosChartVersion
 	ChaosEngine     ChaosEngine
 	ChaosExperiment ChaosExperiment
-	Icon			[]byte
+	Icon            []byte
+}
+
+type WorkflowArgow struct {
+	APIVersion string `yaml:"apiVersion"`
+	Kind       string `yaml:"kind"`
+	Metadata   struct {
+		GenerateName string `yaml:"generateName"`
+		Namespace    string `yaml:"namespace"`
+		Labels       struct {
+			Subject string `yaml:"subject"`
+		} `yaml:"labels"`
+	} `yaml:"metadata"`
+	Spec struct {
+		Entrypoint         string `yaml:"entrypoint"`
+		ServiceAccountName string `yaml:"serviceAccountName"`
+		SecurityContext    struct {
+			RunAsUser    int  `yaml:"runAsUser"`
+			RunAsNonRoot bool `yaml:"runAsNonRoot"`
+		} `yaml:"securityContext"`
+		Arguments struct {
+			Parameters []struct {
+				Name  string `yaml:"name"`
+				Value string `yaml:"value"`
+			} `yaml:"parameters"`
+		} `yaml:"arguments"`
+		Templates []struct {
+			Name  string `yaml:"name"`
+			Steps [][]struct {
+				Name     string `yaml:"name"`
+				Template string `yaml:"template"`
+			} `yaml:"steps,omitempty"`
+			Inputs struct {
+				Artifacts []struct {
+					Name string `yaml:"name"`
+					Path string `yaml:"path"`
+					Raw  struct {
+						Data string `yaml:"data"`
+					} `yaml:"raw"`
+				} `yaml:"artifacts"`
+			} `yaml:"inputs,omitempty"`
+			Container struct {
+				Image   string   `yaml:"image"`
+				Command []string `yaml:"command"`
+				Args    []string `yaml:"args"`
+			} `yaml:"container,omitempty"`
+		} `yaml:"templates"`
+	} `yaml:"spec"`
+}
+
+type WorkflowChart struct {
+	WorkflowChartVersion WorkflowChartVersion
+	WorkflowArgow        WorkflowArgow
+}
+
+type WorkflowChartVersion struct {
+	APIVersion string `yaml:"apiVersion"`
+	Kind       string `yaml:"kind"`
+	Metadata   struct {
+		Name        string `yaml:"name"`
+		Version     string `yaml:"version"`
+		Annotations struct {
+			Categories       string `yaml:"categories"`
+			ChartDescription string `yaml:"chartDescription"`
+		} `yaml:"annotations"`
+	} `yaml:"metadata"`
+	Spec struct {
+		DisplayName         string   `yaml:"displayName"`
+		CategoryDescription string   `yaml:"categoryDescription"`
+		Experiments         []string `yaml:"experiments"`
+		Keywords            []string `yaml:"keywords"`
+		Platforms           []string `yaml:"platforms"`
+		Maintainers         []struct {
+			Name  string `yaml:"name"`
+			Email string `yaml:"email"`
+		} `yaml:"maintainers"`
+		Provider struct {
+			Name string `yaml:"name"`
+		} `yaml:"provider"`
+		Links []struct {
+			Name string `yaml:"name"`
+			URL  string `yaml:"url"`
+		} `yaml:"links"`
+		Icon []struct {
+			URL       string `yaml:"url"`
+			Mediatype string `yaml:"mediatype"`
+		} `yaml:"icon"`
+	} `yaml:"spec"`
 }
 
 type ChaosEngine struct {
+	APIVersion string `yaml:"apiVersion"`
+	Kind       string `yaml:"kind"`
+	Metadata   struct {
+		Name      string `yaml:"name"`
+		Namespace string `yaml:"namespace"`
+	} `yaml:"metadata"`
+	Spec struct {
+		EngineState string `yaml:"engineState"`
+		Appinfo     struct {
+			Appns    string `yaml:"appns"`
+			Applabel string `yaml:"applabel"`
+			Appkind  string `yaml:"appkind"`
+		} `yaml:"appinfo"`
+		ChaosServiceAccount string `yaml:"chaosServiceAccount"`
+		Experiments         []struct {
+			Name string `yaml:"name"`
+			Spec struct {
+				Components struct {
+					Env []struct {
+						Name  string `yaml:"name"`
+						Value string `yaml:"value"`
+					} `yaml:"env"`
+				} `yaml:"components"`
+			} `yaml:"spec"`
+		} `yaml:"experiments"`
+	} `yaml:"spec"`
 }
 
 type ChaosChartVersion struct {
@@ -112,5 +225,5 @@ type Manifest struct {
 	Platform    string       `yaml:"platform"`
 	GitURL      string       `yaml:"gitUrl"`
 	Workflows   []Workflow   `yaml:"workflows"`
-	Experiments []Experiment `yaml:"experiments"`
+	Experiments []ChaosChart `yaml:"experiments"`
 }

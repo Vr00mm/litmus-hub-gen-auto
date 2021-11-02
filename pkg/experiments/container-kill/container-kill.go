@@ -7,9 +7,17 @@ import (
 	"hub-gen-auto/pkg/types"
 )
 
+var ExperimentsManifests map[string]types.ChaosChart
+
 var experimentRequirements = []string{"isRoot"}
 
 var availableLibs = []string{"litmus", "pumba"}
+
+func generateExperiment(composant resources.Object, container string) types.ChaosChart {
+	testVar := ExperimentsManifests["container-kill"]
+	testVar.ChaosExperiment.Metadata.Name = composant.GetName()
+	return testVar
+}
 
 func checkRequirements(composant resources.Object) bool {
 	return requirements.CheckRequirements(experimentRequirements, composant)
