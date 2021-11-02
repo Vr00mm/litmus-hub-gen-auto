@@ -24,6 +24,29 @@ func makeHttpRequest(url string) []byte {
 	return body
 }
 
+func removeDuplicateStr(strSlice []string) []string {
+	allKeys := make(map[string]bool)
+	list := []string{}
+	for _, item := range strSlice {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}
+func removeDuplicateMap(strMap map[string]string) map[string]string {
+	allKeys := make(map[string]bool)
+	list := make(map[string]string)
+	for key, item := range strMap {
+		if _, value := allKeys[key]; !value {
+			allKeys[key] = true
+			list[key] = item
+		}
+	}
+	return list
+}
+
 func GetExperimentsManifests(experimentsList []string) map[string]types.ChaosChart {
 	experiments := make(map[string]types.ChaosChart, len(experimentsList))
 	for _, experimentName := range experimentsList {
