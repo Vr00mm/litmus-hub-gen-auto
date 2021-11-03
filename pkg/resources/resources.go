@@ -81,6 +81,7 @@ func GetResources(clientset kubernetes.Interface) ([]*Resources, error) {
 	namespaces, err := GetNamespaces(clientset)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to get k8s namespaces: %v\n", err)
+		return result, err
 	}
 
 	for _, namespace := range namespaces.Items {

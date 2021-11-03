@@ -1,4 +1,4 @@
-package podKill
+package podCPUHog
 
 import (
 	"hub-gen-auto/pkg/requirements"
@@ -12,9 +12,9 @@ var experimentRequirements = []string{"isRoot"}
 
 var availableLibs = []string{"litmus", "pumba"}
 
-func generateExperiment(composant resources.Object) types.ChaosChart {
-	exp := ExperimentsManifests["pod-kill"]
-	exp.ChaosExperiment.Metadata.Name = "pod-kill-" + composant.GetName()
+func generateExperiment(composant resources.Object, container string) types.ChaosChart {
+	exp := ExperimentsManifests["pod-cpu-hog-exec"]
+	exp.ChaosExperiment.Metadata.Name = "pod-cpu-hog-" + composant.GetName() + "-" + container
 	return exp
 }
 
@@ -24,7 +24,10 @@ func checkRequirements(composant resources.Object) bool {
 
 func Generate(composant resources.Object) []types.ChaosChart {
 	var experiments []types.ChaosChart
-	exp := generateExperiment(composant)
-	experiments = append(experiments, exp)
+	containers, _ := composant.GetContainers()
+	for container := range containers {
+		exp := generateExperiment(composant, containers[container])
+		experiments = append(experiments, exp)
+	}
 	return experiments
 }

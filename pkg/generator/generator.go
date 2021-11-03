@@ -8,14 +8,15 @@ import (
 	"hub-gen-auto/pkg/types"
 	"hub-gen-auto/pkg/utils"
 	"hub-gen-auto/pkg/workflow"
-	
 
 	//	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
-	//	podKill "hub-gen-auto/pkg/experiments/pod-kill"
+	podCPUHog "hub-gen-auto/pkg/experiments/pod-cpu-hog"
+	podKill "hub-gen-auto/pkg/experiments/pod-kill"
+	podMemHog "hub-gen-auto/pkg/experiments/pod-memory-hog"
 )
 
-var experimentsList = []string{"container-kill"}
+var experimentsList = []string{"container-kill", "pod-kill"}
 var experimentsManifests map[string]types.ChaosChart
 
 func init() {
@@ -32,7 +33,24 @@ func generateExperiment(experimentName string, composant resources.Object) []typ
 			experiments = append(experiments, exps[exp])
 		}
 		return experiments
-
+	case "pod-kill":
+		exps := podKill.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-cpu-hog":
+		exps := podCPUHog.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-mem-hog":
+		exps := podMemHog.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
 	default:
 		fmt.Printf("Unsupported experiment %v, please provide the correct value of experiment\n", experimentName)
 		return experiments
@@ -56,6 +74,7 @@ func generateExperiments(composants *resources.Resources, experimentsList []stri
 func generateHub(clusterName string, namespace *resources.Resources, experiments []types.ChaosChart, workflows []types.WorkflowChart) types.Manifest {
 	var project types.Manifest
 	project.Name = clusterName + "-" + namespace.Namespace
+	project.Namespace = namespace.Namespace
 	project.Description = "Experiments and workflow for namespace " + namespace.Namespace + " on cluster " + clusterName
 	project.Platform = clusterName
 	project.Experiments = experiments
@@ -72,7 +91,6 @@ func Generate(clusterName string, res []*resources.Resources) ([]types.Manifest,
 		//        fmt.Printf("Cannot find labels in namespace :\n %v \n", namespace.Namespace)
 		//        continue
 		//}
-
 		compliant := requirements.FindUniqueLabels(namespace)
 		if !compliant {
 			fmt.Printf("Cannot find determinist labels in namespace %v \n", namespace.Namespace)
