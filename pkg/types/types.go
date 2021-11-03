@@ -7,6 +7,28 @@ type ChaosChart struct {
 	Icon            []byte
 }
 
+type WorkflowTemplate struct {
+	Name  string `yaml:"name"`
+	Steps [][]struct {
+		Name     string `yaml:"name"`
+		Template string `yaml:"template"`
+	} `yaml:"steps,omitempty"`
+	Inputs struct {
+		Artifacts []struct {
+			Name string `yaml:"name"`
+			Path string `yaml:"path"`
+			Raw  struct {
+				Data string `yaml:"data"`
+			} `yaml:"raw"`
+		} `yaml:"artifacts"`
+	} `yaml:"inputs,omitempty"`
+	Container struct {
+		Image   string   `yaml:"image"`
+		Command []string `yaml:"command"`
+		Args    []string `yaml:"args"`
+	} `yaml:"container,omitempty"`
+}
+
 type WorkflowArgow struct {
 	APIVersion string `yaml:"apiVersion"`
 	Kind       string `yaml:"kind"`
@@ -30,27 +52,7 @@ type WorkflowArgow struct {
 				Value string `yaml:"value"`
 			} `yaml:"parameters"`
 		} `yaml:"arguments"`
-		Templates []struct {
-			Name  string `yaml:"name"`
-			Steps [][]struct {
-				Name     string `yaml:"name"`
-				Template string `yaml:"template"`
-			} `yaml:"steps,omitempty"`
-			Inputs struct {
-				Artifacts []struct {
-					Name string `yaml:"name"`
-					Path string `yaml:"path"`
-					Raw  struct {
-						Data string `yaml:"data"`
-					} `yaml:"raw"`
-				} `yaml:"artifacts"`
-			} `yaml:"inputs,omitempty"`
-			Container struct {
-				Image   string   `yaml:"image"`
-				Command []string `yaml:"command"`
-				Args    []string `yaml:"args"`
-			} `yaml:"container,omitempty"`
-		} `yaml:"templates"`
+		Templates []*WorkflowTemplate `yaml:"templates"`
 	} `yaml:"spec"`
 }
 
@@ -204,11 +206,6 @@ type ChaosExperiment struct {
 	} `yaml:"spec"`
 }
 
-type Workflow struct {
-	Name        string   `yaml:"name"`
-	Experiments []string `yaml:"experiments"`
-}
-
 type Experiment struct {
 	Name        string            `yaml:"name"`
 	Template    string            `yaml:"template"`
@@ -219,11 +216,11 @@ type Experiment struct {
 }
 
 type Manifest struct {
-	Name        string       `yaml:"name"`
-	Description string       `yaml:"description"`
-	Namespace   string       `yaml:"namespace"`
-	Platform    string       `yaml:"platform"`
-	GitURL      string       `yaml:"gitUrl"`
-	Workflows   []Workflow   `yaml:"workflows"`
-	Experiments []ChaosChart `yaml:"experiments"`
+	Name        string          `yaml:"name"`
+	Description string          `yaml:"description"`
+	Namespace   string          `yaml:"namespace"`
+	Platform    string          `yaml:"platform"`
+	GitURL      string          `yaml:"gitUrl"`
+	Workflows   []WorkflowChart `yaml:"workflows"`
+	Experiments []ChaosChart    `yaml:"experiments"`
 }

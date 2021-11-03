@@ -3,17 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"encoding/json"
-	"io/ioutil"
-
+	"hub-gen-auto/pkg/builder"
 	"hub-gen-auto/pkg/clients"
 	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/utils"
+	"io/ioutil"
+
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -38,7 +41,6 @@ const (
 )
 
 var (
-	dir              string
 	kubeconfigs      []string
 	outFile          string
 	containerRuntime string
@@ -98,9 +100,16 @@ func main() {
 			continue
 		}
 
-		file, _ := json.MarshalIndent(manifest, "", " ")
+		err := builder.Build(clusterName, manifest)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot write experiments to disk: %v\n", err)
+			continue
+		}
 
-		_ = ioutil.WriteFile("test.json", file, 0644)
+		file, _ := yaml.Marshal(&manifest)
+
+		_ = ioutil.WriteFile("test.yaml", file, 0644)
+		http.ListenAndServe("localhost:8080", nil)
 	}
 	os.Exit(0)
 
