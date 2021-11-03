@@ -8,15 +8,11 @@ import (
 	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/utils"
-	"io/ioutil"
 
-	"net/http"
-	_ "net/http/pprof"
+	//_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -100,16 +96,12 @@ func main() {
 			continue
 		}
 
-		err := builder.Build(clusterName, manifest)
+		builder.Build(clusterName, manifest)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot write experiments to disk: %v\n", err)
 			continue
 		}
-
-		file, _ := yaml.Marshal(&manifest)
-
-		_ = ioutil.WriteFile("test.yaml", file, 0644)
-		http.ListenAndServe("localhost:8080", nil)
+		//http.ListenAndServe("localhost:8080", nil)
 	}
 	os.Exit(0)
 

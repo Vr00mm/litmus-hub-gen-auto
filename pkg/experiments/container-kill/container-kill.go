@@ -14,9 +14,9 @@ var experimentRequirements = []string{"isRoot"}
 var availableLibs = []string{"litmus", "pumba"}
 
 func generateExperiment(composant resources.Object, container string) types.ChaosChart {
-	testVar := ExperimentsManifests["container-kill"]
-	testVar.ChaosExperiment.Metadata.Name = composant.GetName()
-	return testVar
+	exp := ExperimentsManifests["container-kill"]
+	exp.ChaosExperiment.Metadata.Name = "container-kill-" + composant.GetName() + "-" + container
+	return exp
 }
 
 func checkRequirements(composant resources.Object) bool {

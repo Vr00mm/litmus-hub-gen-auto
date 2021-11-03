@@ -3,35 +3,31 @@ package builder
 import (
 	"fmt"
 	"hub-gen-auto/pkg/types"
+	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v3"
 )
 
-func writeToFile(filename string, data string) {
-	destination, err := os.Create(filename)
+func writeToFile(filename string, data interface{}) {
+	file, err := yaml.Marshal(data)
 	if err != nil {
-		fmt.Println("os.Create:", err)
-		return
+		fmt.Printf("An error occured: %v\n", err)
 	}
-	defer destination.Close()
-	fmt.Fprintf(destination, "%s", data)
+	err = ioutil.WriteFile(filename, file, 0644)
+	if err != nil {
+		fmt.Printf("An error occured: %v\n", err)
+	}
 }
 
 func Build(clusterName string, manifests []types.Manifest) error {
 	var err error
-	os.MkdirAll("build/"+clusterName, os.ModePerm)
-
 	for _, manifest := range manifests {
-		os.MkdirAll("build/"+clusterName+"/"+manifest.Namespace, os.ModePerm)
 		for _, experiment := range manifest.Experiments {
-			os.MkdirAll("build/"+clusterName+"/"+manifest.Namespace, os.ModePerm)
-			exp, _ := yaml.Marshal(&experiment.ChaosExperiment)
-			engine, _ := yaml.Marshal(&experiment.ChaosEngine)
-			chart, _ := yaml.Marshal(&experiment.ChaosExperiment)
-			writeToFile("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/experiment.yaml", string(exp))
-			writeToFile("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/engine.yaml", string(engine))
-			writeToFile("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/"+experiment.ChaosExperiment.Metadata.Name+".chartserviceversion.yaml", string(chart))
+			os.MkdirAll("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/", os.ModePerm)
+			writeToFile("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/experiment.yaml", experiment.ChaosExperiment)
+			writeToFile("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/engine.yaml", experiment.ChaosEngine)
+			writeToFile("build/"+clusterName+"/"+manifest.Namespace+"/"+experiment.ChaosExperiment.Metadata.Name+"/"+experiment.ChaosExperiment.Metadata.Name+".chartserviceversion.yaml", experiment.ChaosExperiment)
 		}
 
 	}
