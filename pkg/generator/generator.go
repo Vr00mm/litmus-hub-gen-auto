@@ -7,6 +7,8 @@ import (
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/types"
 	"hub-gen-auto/pkg/utils"
+	"hub-gen-auto/pkg/workflow"
+	
 
 	//	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
@@ -14,30 +16,11 @@ import (
 )
 
 var experimentsList = []string{"container-kill"}
+var experimentsManifests map[string]types.ChaosChart
 
 func init() {
-	experimentsManifests := utils.GetExperimentsManifests(experimentsList)
+	experimentsManifests = utils.GetExperimentsManifests(experimentsList)
 	containerKill.ExperimentsManifests = experimentsManifests
-}
-
-func generateWorkflows(composants *resources.Resources) []types.Workflow {
-	var workflows
-	var workflowChartVersion types.WorkflowChartVersion
-	var workflowArgow types.WorkflowChartVersion
-
-	var workflows []types.Workflow
-	var experiments []string
-	for _, composant := range composants.Objects {
-		var workflow types.Workflow
-		for experiment := range composant.GeneratedExperiments {
-			experiments = append(experiments, composant.GeneratedExperiments[experiment])
-		}
-		workflow.Experiments = experiments
-		workflow.Name = composants.Namespace + "-" + composant.GetName()
-		workflows = append(workflows, workflow)
-	}
-	return workflows
-
 }
 
 func generateExperiment(experimentName string, composant resources.Object) []types.ChaosChart {
@@ -70,7 +53,7 @@ func generateExperiments(composants *resources.Resources, experimentsList []stri
 	return experiments
 }
 
-func generateHub(clusterName string, namespace *resources.Resources, experiments []types.ChaosChart, workflows []types.Workflow) types.Manifest {
+func generateHub(clusterName string, namespace *resources.Resources, experiments []types.ChaosChart, workflows []types.WorkflowChart) types.Manifest {
 	var project types.Manifest
 	project.Name = clusterName + "-" + namespace.Namespace
 	project.Description = "Experiments and workflow for namespace " + namespace.Namespace + " on cluster " + clusterName
@@ -106,7 +89,7 @@ func Generate(clusterName string, res []*resources.Resources) ([]types.Manifest,
 		fmt.Printf("Génération des experiments terminée.\n")
 		fmt.Printf("Lancement de la génération des workflows.\n")
 
-		workflows := generateWorkflows(namespace)
+		workflows := workflow.Generate(namespace, experimentsManifests)
 		if len(workflows) < 1 {
 			fmt.Printf("Cannot generate workflows for: %v\n", namespace.Namespace)
 			continue

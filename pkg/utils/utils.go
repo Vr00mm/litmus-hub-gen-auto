@@ -24,7 +24,7 @@ func makeHttpRequest(url string) []byte {
 	return body
 }
 
-func removeDuplicateStr(strSlice []string) []string {
+func RemoveDuplicateStr(strSlice []string) []string {
 	allKeys := make(map[string]bool)
 	list := []string{}
 	for _, item := range strSlice {
@@ -35,13 +35,25 @@ func removeDuplicateStr(strSlice []string) []string {
 	}
 	return list
 }
-func removeDuplicateMap(strMap map[string]string) map[string]string {
+func RemoveDuplicateMap(strMap []struct {
+	Name  string "yaml:\"name\""
+	Email string "yaml:\"email\""
+}) []struct {
+	Name  string "yaml:\"name\""
+	Email string "yaml:\"email\""
+} {
 	allKeys := make(map[string]bool)
-	list := make(map[string]string)
-	for key, item := range strMap {
-		if _, value := allKeys[key]; !value {
-			allKeys[key] = true
-			list[key] = item
+	var list []struct {
+		Name  string "yaml:\"name\""
+		Email string "yaml:\"email\""
+	}
+	for _, item := range strMap {
+		if _, value := allKeys[item.Name]; !value {
+			allKeys[item.Name] = true
+			list = append(list, struct {
+				Name  string "yaml:\"name\""
+				Email string "yaml:\"email\""
+			}{item.Name, item.Email})
 		}
 	}
 	return list
