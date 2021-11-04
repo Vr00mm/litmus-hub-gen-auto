@@ -5,6 +5,17 @@ type ChaosChart struct {
 	ChaosEngine     ChaosEngine
 	ChaosExperiment ChaosExperiment
 	Icon            []byte
+	RBAC            []byte
+	PSP             []byte
+}
+
+type HubPackage struct {
+	PackageName string `yaml:"packageName"`
+	Experiments []struct {
+		Name string `yaml:"name"`
+		CSV  string `yaml:"CSV"`
+		Desc string `yaml:"desc"`
+	} `yaml:"experiments"`
 }
 
 type WorkflowTemplate struct {
@@ -74,8 +85,8 @@ type WorkflowChartVersion struct {
 	} `yaml:"metadata"`
 	Spec struct {
 		DisplayName         string   `yaml:"displayName"`
-		CategoryDescription string   `yaml:"categoryDescription"`
 		Experiments         []string `yaml:"experiments"`
+		CategoryDescription string   `yaml:"categoryDescription"`
 		Keywords            []string `yaml:"keywords"`
 		Platforms           []string `yaml:"platforms"`
 		Maintainers         []struct {
@@ -139,6 +150,7 @@ type ChaosChartVersion struct {
 	} `yaml:"metadata"`
 	Spec struct {
 		DisplayName         string   `yaml:"displayName"`
+		Experiments         []string `yaml:"experiments"`
 		CategoryDescription string   `yaml:"categoryDescription"`
 		Keywords            []string `yaml:"keywords"`
 		Platforms           []string `yaml:"platforms"`
@@ -206,21 +218,14 @@ type ChaosExperiment struct {
 	} `yaml:"spec"`
 }
 
-type Experiment struct {
-	Name        string            `yaml:"name"`
-	Template    string            `yaml:"template"`
-	Permissions string            `yaml:"permissions"`
-	Label       string            `yaml:"label"`
-	Kind        string            `yaml:"kind"`
-	Args        map[string]string `yaml:"args"`
-}
-
 type Manifest struct {
-	Name        string          `yaml:"name"`
-	Description string          `yaml:"description"`
-	Namespace   string          `yaml:"namespace"`
-	Platform    string          `yaml:"platform"`
-	GitURL      string          `yaml:"gitUrl"`
-	Workflows   []WorkflowChart `yaml:"workflows"`
-	Experiments []ChaosChart    `yaml:"experiments"`
+	Name        string            `yaml:"name"`
+	Description string            `yaml:"description"`
+	Namespace   string            `yaml:"namespace"`
+	Platform    string            `yaml:"platform"`
+	GitURL      string            `yaml:"gitUrl"`
+	Workflows   []WorkflowChart   `yaml:"workflows"`
+	Experiments []ChaosChart      `yaml:"experiments"`
+	Package     HubPackage        `yaml:"package"`
+	Chart       ChaosChartVersion `yaml:"chart"`
 }

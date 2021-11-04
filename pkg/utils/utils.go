@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func makeHttpRequest(url string) []byte {
+func MakeHttpRequest(url string) []byte {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatalln(err)
@@ -35,6 +35,7 @@ func RemoveDuplicateStr(strSlice []string) []string {
 	}
 	return list
 }
+
 func RemoveDuplicateMap(strMap []struct {
 	Name  string "yaml:\"name\""
 	Email string "yaml:\"email\""
@@ -63,15 +64,18 @@ func GetExperimentsManifests(experimentsList []string) map[string]types.ChaosCha
 	experiments := make(map[string]types.ChaosChart, len(experimentsList))
 	for _, experimentName := range experimentsList {
 		var chaosChart types.ChaosChart
-
 		var chaosChartVersion types.ChaosChartVersion
 		var chaosEngine types.ChaosEngine
 		var chaosExperiment types.ChaosExperiment
 
-		chaosChartVersionManifest := makeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/" + experimentName + ".chartserviceversion.yaml")
-		chaosEngineManifest := makeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/engine.yaml")
-		chaosExperimentManifest := makeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/experiment.yaml")
-		chaosIcon := []byte(makeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/icons/" + experimentName + ".png"))
+
+		chaosChartVersionManifest := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/" + experimentName + ".chartserviceversion.yaml")
+		chaosEngineManifest := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/engine.yaml")
+		chaosExperimentManifest := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/experiment.yaml")
+		chaosExperimentPsp := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/rbac-psp.yaml")
+		chaosExperimentRbac := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/rbac.yaml")
+
+		chaosIcon := []byte(MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/icons/" + experimentName + ".png"))
 
 		if err := yaml.Unmarshal(chaosChartVersionManifest, &chaosChartVersion); err != nil {
 			panic(err)
@@ -82,10 +86,13 @@ func GetExperimentsManifests(experimentsList []string) map[string]types.ChaosCha
 		if err := yaml.Unmarshal(chaosExperimentManifest, &chaosExperiment); err != nil {
 			panic(err)
 		}
+
 		chaosChart.ChaosEngine = chaosEngine
 		chaosChart.ChaosExperiment = chaosExperiment
 		chaosChart.ChartVersion = chaosChartVersion
 		chaosChart.Icon = chaosIcon
+		chaosChart.PSP = chaosExperimentPsp
+		chaosChart.RBAC = chaosExperimentRbac
 		experiments[experimentName] = chaosChart
 	}
 

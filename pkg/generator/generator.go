@@ -8,6 +8,7 @@ import (
 	"hub-gen-auto/pkg/types"
 	"hub-gen-auto/pkg/utils"
 	"hub-gen-auto/pkg/workflow"
+	"gopkg.in/yaml.v3"
 
 	//	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
@@ -108,12 +109,35 @@ func generateExperiments(composants *resources.Resources, experimentsList []stri
 
 func generateHub(clusterName string, namespace *resources.Resources, experiments []types.ChaosChart, workflows []types.WorkflowChart) types.Manifest {
 	var project types.Manifest
+	var hubPackage types.HubPackage
+	var hubChart types.ChaosChartVersion
+
+	hubChartData := utils.MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/generic.package.yaml")
+	if err := yaml.Unmarshal(hubChartData, &hubChart); err != nil {
+		panic(err)
+	}
+
+	hubChart.Metadata.Name = clusterName + "-" + namespace.Namespace
+	hubChart.Spec.Experiments = []string{}
+	hubChart.Spec.Keywords = []string{}
+
+	hubPackage.PackageName = clusterName + "-" + namespace.Namespace
+	for _, experiment := range experiments {
+		hubPackage.Experiments = append(hubPackage.Experiments, struct {
+			Name string "yaml:\"name\""
+			CSV  string "yaml:\"CSV\""
+			Desc string "yaml:\"desc\""
+		}{experiment.ChaosExperiment.Metadata.Name, experiment.ChaosExperiment.Metadata.Name + ".chartserviceversion.yaml", experiment.ChaosExperiment.Metadata.Name})
+		hubChart.Spec.Experiments = append(hubChart.Spec.Experiments, experiment.ChaosExperiment.Metadata.Name)
+	}
 	project.Name = clusterName + "-" + namespace.Namespace
 	project.Namespace = namespace.Namespace
 	project.Description = "Experiments and workflow for namespace " + namespace.Namespace + " on cluster " + clusterName
 	project.Platform = clusterName
 	project.Experiments = experiments
 	project.Workflows = workflows
+	project.Package = hubPackage
+	project.Chart = hubChart
 	return project
 }
 
