@@ -12,11 +12,16 @@ import (
 	//	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
 	podCPUHog "hub-gen-auto/pkg/experiments/pod-cpu-hog"
+	podIOStress "hub-gen-auto/pkg/experiments/pod-io-stress"
 	podKill "hub-gen-auto/pkg/experiments/pod-kill"
 	podMemHog "hub-gen-auto/pkg/experiments/pod-memory-hog"
+	podNetCorruption "hub-gen-auto/pkg/experiments/pod-network-corruption"
+	podNetDuplication "hub-gen-auto/pkg/experiments/pod-network-duplication"
+	podNetLatency "hub-gen-auto/pkg/experiments/pod-network-latency"
+	podNetLoss "hub-gen-auto/pkg/experiments/pod-network-loss"
 )
 
-var experimentsList = []string{"container-kill", "pod-kill"}
+var experimentsList = []string{"container-kill", "pod-kill", "pod-cpu-hog", "pod-mem-hog", "pod-io-stress"}
 var experimentsManifests map[string]types.ChaosChart
 
 func init() {
@@ -47,6 +52,36 @@ func generateExperiment(experimentName string, composant resources.Object) []typ
 		return experiments
 	case "pod-mem-hog":
 		exps := podMemHog.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-io-stress":
+		exps := podIOStress.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-network-corruption":
+		exps := podNetCorruption.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-network-duplication":
+		exps := podNetDuplication.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-network-latency":
+		exps := podNetLatency.Generate(composant)
+		for exp := range exps {
+			experiments = append(experiments, exps[exp])
+		}
+		return experiments
+	case "pod-network-loss":
+		exps := podNetLoss.Generate(composant)
 		for exp := range exps {
 			experiments = append(experiments, exps[exp])
 		}
