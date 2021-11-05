@@ -27,6 +27,10 @@ func Generate(composant resources.Object) []types.ChaosChart {
 	containers, _ := composant.GetContainers()
 	for container := range containers {
 		exp := generateExperiment(composant, containers[container])
+		exp.Type = composant.Type
+		exp.TemplateName = "pod-mem-hog"
+		exp.Composant = composant.GetName()
+		exp.Container = containers[container]
 		experiments = append(experiments, exp)
 	}
 	return experiments

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -68,7 +69,6 @@ func GetExperimentsManifests(experimentsList []string) map[string]types.ChaosCha
 		var chaosEngine types.ChaosEngine
 		var chaosExperiment types.ChaosExperiment
 
-
 		chaosChartVersionManifest := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/" + experimentName + ".chartserviceversion.yaml")
 		chaosEngineManifest := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/engine.yaml")
 		chaosExperimentManifest := MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/" + experimentName + "/experiment.yaml")
@@ -97,6 +97,30 @@ func GetExperimentsManifests(experimentsList []string) map[string]types.ChaosCha
 	}
 
 	return experiments
+}
+
+func WriteToFile(filename string, data string) {
+	dir := filepath.Dir(filename)
+	os.MkdirAll(dir, os.ModePerm)
+
+	err := ioutil.WriteFile(filename, []byte(data), 0644)
+	if err != nil {
+		fmt.Printf("An error occured: %v\n", err)
+	}
+}
+
+func WriteToFileAsYaml(filename string, data interface{}) {
+	dir := filepath.Dir(filename)
+	os.MkdirAll(dir, os.ModePerm)
+
+	file, err := yaml.Marshal(data)
+	if err != nil {
+		fmt.Printf("An error occured: %v\n", err)
+	}
+	err = ioutil.WriteFile(filename, file, 0644)
+	if err != nil {
+		fmt.Printf("An error occured: %v\n", err)
+	}
 }
 
 func WriteArrayToFile(sampledata []string, outfile string) {

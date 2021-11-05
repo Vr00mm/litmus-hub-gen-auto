@@ -4,6 +4,7 @@ import (
 	"hub-gen-auto/pkg/requirements"
 	"hub-gen-auto/pkg/resources"
 	"hub-gen-auto/pkg/types"
+	"strings"
 )
 
 var ExperimentsManifests map[string]types.ChaosChart
@@ -24,7 +25,12 @@ func checkRequirements(composant resources.Object) bool {
 
 func Generate(composant resources.Object) []types.ChaosChart {
 	var experiments []types.ChaosChart
+	containers, _ := composant.GetContainers()
 	exp := generateExperiment(composant)
+	exp.Type = composant.Type
+	exp.TemplateName = "pod-delete"
+	exp.Composant = composant.GetName()
+	exp.Container = strings.Join(containers, ", ")
 	experiments = append(experiments, exp)
 	return experiments
 }
