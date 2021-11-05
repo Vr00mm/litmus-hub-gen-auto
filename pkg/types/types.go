@@ -7,6 +7,10 @@ type ChaosChart struct {
 	Icon            []byte
 	RBAC            []byte
 	PSP             []byte
+	TemplateName	string
+	Type            string
+	Composant 		string
+	Container		string
 }
 
 type HubPackage struct {

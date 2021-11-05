@@ -7,6 +7,7 @@ import (
 	"hub-gen-auto/pkg/clients"
 	"hub-gen-auto/pkg/generator"
 	"hub-gen-auto/pkg/resources"
+	"hub-gen-auto/pkg/templates/md"
 	"hub-gen-auto/pkg/utils"
 
 	//_ "net/http/pprof"
@@ -101,6 +102,10 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Cannot write experiments to disk: %v\n", err)
 			continue
 		}
+
+		//Generate documentation
+
+		md.Generate(clusterName, manifest)
 		//http.ListenAndServe("localhost:8080", nil)
 	}
 	os.Exit(0)
