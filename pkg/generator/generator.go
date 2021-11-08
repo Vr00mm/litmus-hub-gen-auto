@@ -8,13 +8,14 @@ import (
 	"hub-gen-auto/pkg/types"
 	"hub-gen-auto/pkg/utils"
 	"hub-gen-auto/pkg/workflow"
+
 	"gopkg.in/yaml.v3"
 
 	//	"strings"
 	containerKill "hub-gen-auto/pkg/experiments/container-kill"
 	podCPUHog "hub-gen-auto/pkg/experiments/pod-cpu-hog"
+	podKill "hub-gen-auto/pkg/experiments/pod-delete"
 	podIOStress "hub-gen-auto/pkg/experiments/pod-io-stress"
-	podKill "hub-gen-auto/pkg/experiments/pod-kill"
 	podMemHog "hub-gen-auto/pkg/experiments/pod-memory-hog"
 	podNetCorruption "hub-gen-auto/pkg/experiments/pod-network-corruption"
 	podNetDuplication "hub-gen-auto/pkg/experiments/pod-network-duplication"
@@ -22,12 +23,20 @@ import (
 	podNetLoss "hub-gen-auto/pkg/experiments/pod-network-loss"
 )
 
-var experimentsList = []string{"container-kill", "pod-kill", "pod-cpu-hog", "pod-mem-hog", "pod-io-stress"}
+var experimentsList = []string{"container-kill", "pod-delete", "pod-cpu-hog", "pod-mem-hog", "pod-io-stress", "pod-network-corruption", "pod-network-duplication", "pod-network-loss", "pod-network-latency"}
 var experimentsManifests map[string]types.ChaosChart
 
 func init() {
 	experimentsManifests = utils.GetExperimentsManifests(experimentsList)
 	containerKill.ExperimentsManifests = experimentsManifests
+	podCPUHog.ExperimentsManifests = experimentsManifests
+	podKill.ExperimentsManifests = experimentsManifests
+	podIOStress.ExperimentsManifests = experimentsManifests
+	podMemHog.ExperimentsManifests = experimentsManifests
+	podNetCorruption.ExperimentsManifests = experimentsManifests
+	podNetDuplication.ExperimentsManifests = experimentsManifests
+	podNetLatency.ExperimentsManifests = experimentsManifests
+	podNetLoss.ExperimentsManifests = experimentsManifests
 }
 
 func generateExperiment(experimentName string, composant resources.Object) []types.ChaosChart {
@@ -39,7 +48,7 @@ func generateExperiment(experimentName string, composant resources.Object) []typ
 			experiments = append(experiments, exps[exp])
 		}
 		return experiments
-	case "pod-kill":
+	case "pod-delete":
 		exps := podKill.Generate(composant)
 		for exp := range exps {
 			experiments = append(experiments, exps[exp])
@@ -112,12 +121,14 @@ func generateHub(clusterName string, namespace *resources.Resources, experiments
 	var hubPackage types.HubPackage
 	var hubChart types.ChaosChartVersion
 
-	hubChartData := utils.MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/generic.package.yaml")
+	hubChartData := utils.MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/generic.chartserviceversion.yaml")
 	if err := yaml.Unmarshal(hubChartData, &hubChart); err != nil {
 		panic(err)
 	}
 
 	hubChart.Metadata.Name = clusterName + "-" + namespace.Namespace
+	hubChart.Spec.DisplayName = clusterName + "-" + namespace.Namespace
+
 	hubChart.Spec.Experiments = []string{}
 	hubChart.Spec.Keywords = []string{}
 
@@ -152,7 +163,7 @@ func Generate(clusterName string, res []*resources.Resources) ([]types.Manifest,
 		//}
 		compliant := requirements.FindUniqueLabels(namespace)
 		if !compliant {
-			fmt.Printf("Cannot find determinist labels in namespace %v \n", namespace.Namespace)
+			fmt.Printf("Cannot find determinist labels in namespace %v in %v \n", namespace.Namespace, clusterName)
 			continue
 		}
 
