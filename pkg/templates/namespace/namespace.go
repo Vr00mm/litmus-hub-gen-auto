@@ -18,12 +18,13 @@ func init() {
 
 | Exercice | Container | Lien | Commentaire
 | ------ | ------ | ------ | ------ |
-{{range _, $experiment := $experiments -}}
-| {{$experiment.TemplateName}} |  | [documentation/experiments/clusters/{{$.ClusterName}}/${{.Namespace}}/{{$experiment.ChaosExperiment.Metadata.Name}}.md](PlDb) | |
+{{range $experiment := $experiments -}}
+| [{{$experiment.TemplateName}}](documentation/experiments/{{$experiment.TemplateName}}.md) | {{$experiment.Container}} | [documentation/experiments/clusters/{{$.ClusterName}}/{{$.Namespace}}/{{$experiment.ChaosExperiment.Metadata.Name}}.md](PlDb) | |
+{{end}}
 {{end}}`
 }
 
-func sortByComponent(namespace types.Manifest) map[string][]types.ChaosChart{
+func sortByComponent(namespace types.Manifest) map[string][]types.ChaosChart {
 	result := make(map[string][]types.ChaosChart)
 	for _, experiment := range namespace.Experiments {
 		composantName := experiment.Type + "/" + experiment.Composant
@@ -46,7 +47,7 @@ func Generate(data struct {
 	err = t.Execute(&tpl, struct {
 		ClusterName string
 		Namespace   string
-		Composants map[string][]types.ChaosChart
+		Composants  map[string][]types.ChaosChart
 	}{data.ClusterName, data.Namespace.Namespace, sortedData})
 	if err != nil {
 		panic(err)

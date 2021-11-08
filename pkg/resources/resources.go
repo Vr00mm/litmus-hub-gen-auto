@@ -3,13 +3,15 @@ package resources
 import (
 	"context"
 	"fmt"
+
 	//	appsv1 "k8s.io/api/apps/v1"
 	"encoding/json"
+	"os"
+
 	"github.com/buger/jsonparser"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"os"
 	//	"byte"
 )
 
@@ -41,7 +43,8 @@ func (obj *Object) AddUniqueLabel(label string) {
 
 func (obj *Object) GetLabels() map[string]string {
 	var results map[string]string
-	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels"); err == nil {
+	//if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels"); err == nil {
+	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "spec", "template", "metadata", "labels"); err == nil {
 		json.Unmarshal(data, &results)
 		return results
 	}

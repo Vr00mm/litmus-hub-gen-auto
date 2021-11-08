@@ -24,7 +24,6 @@ func FindUniqueLabels(composants *resources.Resources) bool {
 						labelO := fmt.Sprintf("%s=%s", labelNameO, labelValueO)
 						if label == labelO {
 							skip = true
-							ready = false
 						}
 					}
 				}
@@ -32,6 +31,9 @@ func FindUniqueLabels(composants *resources.Resources) bool {
 			if !skip {
 				composants.Objects[composant].AddUniqueLabel(label)
 			}
+		}
+		if len(composants.Objects[composant].UniqueLabels) < 1 {
+			ready = false
 		}
 	}
 	return ready
