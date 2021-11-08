@@ -25,9 +25,11 @@ import (
 
 var experimentsList = []string{"container-kill", "pod-delete", "pod-cpu-hog", "pod-mem-hog", "pod-io-stress", "pod-network-corruption", "pod-network-duplication", "pod-network-loss", "pod-network-latency"}
 var experimentsManifests map[string]types.ChaosChart
+var hubChartData []byte
 
 func init() {
 	experimentsManifests = utils.GetExperimentsManifests(experimentsList)
+	hubChartData = utils.MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/generic.chartserviceversion.yaml")
 	containerKill.ExperimentsManifests = experimentsManifests
 	podCPUHog.ExperimentsManifests = experimentsManifests
 	podKill.ExperimentsManifests = experimentsManifests
@@ -121,7 +123,6 @@ func generateHub(clusterName string, namespace *resources.Resources, experiments
 	var hubPackage types.HubPackage
 	var hubChart types.ChaosChartVersion
 
-	hubChartData := utils.MakeHttpRequest("https://raw.githubusercontent.com/litmuschaos/chaos-charts/master/charts/generic/generic.chartserviceversion.yaml")
 	if err := yaml.Unmarshal(hubChartData, &hubChart); err != nil {
 		panic(err)
 	}
