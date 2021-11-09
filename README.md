@@ -31,7 +31,13 @@ curl -LJO https://github.com/Vr00mm/litmus-hub-gen-auto/releases/download/v0.1.0
 **Note**: An active connection to https://github.com/litmuschaos/chaos-chart/* is required.
 
 ```bash
+export KUBECONFIG="${USER}/.kube/config"
 hub-gen-auto
+```
+
+You can define multiple kubeconfig with a ":" separator like:
+```bash
+export KUBECONFIG="${USER}/.kube/config:${USER}/.kube/config2"
 ```
 
 #### Step-3: Push the hub to your chaos-chart private repository
