@@ -17,7 +17,11 @@ The following steps will help you to generate privates hub.
 #### Step-1: Download the hub-gen-auto latest release
 
 ```bash
-curl -LJO https://github.com/vr00mm/litmus-hub-gen-auto/releases/download/0.1.0/litmus-hub-gen-auto_0.0.1-next_Linux_x86_64
+curl -LJO https://github.com/Vr00mm/litmus-hub-gen-auto/releases/download/v0.1.0/litmus-hub-gen-auto_0.1.0_linux_amd64.tar.gz \
+&& tar xzvf litmus-hub-gen-auto_0.1.0_linux_amd64.tar.gz \
+&& rm litmus-hub-gen-auto_0.1.0_linux_amd64.tar.gz README.MD \
+&& mv litmus-hub-gen-auto /usr/local/bin/hub-gen-auto
+ 
 ```
 
 #### Step-2: Execute the hub-gen-auto
