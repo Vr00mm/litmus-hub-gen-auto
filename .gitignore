@@ -2,3 +2,5 @@ build/**
 documentation/**
 data.csv
 *.txt
+
+dist/
