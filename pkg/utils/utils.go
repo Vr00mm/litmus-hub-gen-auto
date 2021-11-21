@@ -9,8 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
+	"github.com/buger/jsonparser"
 	"gopkg.in/yaml.v3"
+	ymlToJson "github.com/ghodss/yaml"
 )
 
 func MakeHttpRequest(url string) []byte {
@@ -61,7 +62,28 @@ func RemoveDuplicateMap(strMap []struct {
 	return list
 }
 
+func GetClusterName(kubeConfigPath string) string {
+	var results string
+
+	kubeConfig, err := os.Open(kubeConfigPath)
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		fmt.Println(err)
+	}
+	byteValue, _ := ioutil.ReadAll(kubeConfig)
+	jsonValue, err := ymlToJson.YAMLToJSON(byteValue)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
+
+	if data, _, _, err := jsonparser.Get([]byte(jsonValue), "clusters", "[0]", "name"); err == nil {
+		return string(data)
+	}
+	return results
+	
+}
 func GetExperimentsManifests(experimentsList []string) map[string]types.ChaosChart {
+
 	experiments := make(map[string]types.ChaosChart, len(experimentsList))
 	for _, experimentName := range experimentsList {
 		var chaosChart types.ChaosChart

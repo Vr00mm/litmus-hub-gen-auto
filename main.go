@@ -48,8 +48,6 @@ var (
 )
 
 func init() {
-
-	utils.WriteArrayToFile([]string{"ligne1", "ligne2"}, "data.csv")
 	var kubeconfig string
 	if kubeconfigEnv := os.Getenv("KUBECONFIG"); kubeconfigEnv != "" {
 		kubeconfigs = strings.Split(kubeconfigEnv, ":")
@@ -75,7 +73,7 @@ func main() {
 	for _, kubeconfig := range kubeconfigs {
 
 		// Get ClusterName from filename
-		clusterName := kubeconfig[strings.LastIndex(kubeconfig, "_")+1:]
+		clusterName := utils.GetClusterName(kubeconfig)
 
 		fmt.Printf("Connect to cluster: %s\n", clusterName)
 		// Create Kubernetes Client
@@ -84,7 +82,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Failed to init k8s config: %v\n", err)
 			continue
 		}
-
 		results, err := resources.GetResources(clientset)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot get resources: %v\n", err)
