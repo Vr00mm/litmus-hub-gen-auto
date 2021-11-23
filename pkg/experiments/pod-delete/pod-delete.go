@@ -16,6 +16,9 @@ var availableLibs = []string{"litmus", "pumba"}
 func generateExperiment(composant resources.Object) types.ChaosChart {
 	exp := ExperimentsManifests["pod-delete"]
 	exp.ChaosExperiment.Metadata.Name = "pod-delete-" + composant.GetName()
+	exp.ChaosEngine.Spec.Appinfo.Appkind = composant.Type
+	exp.ChaosEngine.Spec.Appinfo.Applabel = composant.GetUniqueLabel()
+	exp.ChaosEngine.Spec.Appinfo.Appns = composant.GetNamespace()
 	return exp
 }
 

@@ -59,6 +59,14 @@ func (obj *Object) GetName() string {
 	return string(data)
 }
 
+func (obj *Object) GetNamespace() string {
+	var data []byte
+	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "namespace"); err == nil {
+		return string(data)
+	}
+	return string(data)
+}
+
 func (obj *Object) GetLabel(label string) (string, bool) {
 	if data, _, _, err := jsonparser.Get([]byte(obj.JsonData), "metadata", "labels", label); err == nil {
 		return string(data), true
