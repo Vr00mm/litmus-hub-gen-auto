@@ -19,9 +19,9 @@ func generateExperiment(composant resources.Object, container string) types.Chao
 	exp.ChaosEngine.Spec.Appinfo.Applabel = composant.GetUniqueLabel()
 	exp.ChaosEngine.Spec.Appinfo.Appns = composant.GetNamespace()
 
-    var arrayExpParameters []struct{Name string "yaml:\"name\""; Spec struct{Components struct{Env []struct{Name string "yaml:\"name\""; Value string "yaml:\"value\""} "yaml:\"env\""} "yaml:\"components\""} "yaml:\"spec\""}
+        var arrayExpParameters []struct{Name string "yaml:\"name\""; Spec struct{Components struct{Env []struct{Name string "yaml:\"name\""; Value string "yaml:\"value\""} "yaml:\"env\""} "yaml:\"components\""} "yaml:\"spec\""}
 	var expParameters struct{Name string "yaml:\"name\""; Spec struct{Components struct{Env []struct{Name string "yaml:\"name\""; Value string "yaml:\"value\""} "yaml:\"env\""} "yaml:\"components\""} "yaml:\"spec\""}
-    
+
 
 	expParameters.Name = "pod-mem-hog-" + composant.GetName() + "-" + container
 	expParameters.Spec.Components.Env = append(expParameters.Spec.Components.Env, struct {

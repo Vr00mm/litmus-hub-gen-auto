@@ -23,7 +23,7 @@ import (
 	podNetLoss "hub-gen-auto/pkg/experiments/pod-network-loss"
 )
 
-var experimentsList = []string{"container-kill", "pod-delete", "pod-cpu-hog", "pod-mem-hog", "pod-io-stress", "pod-network-corruption", "pod-network-duplication", "pod-network-loss", "pod-network-latency"}
+var experimentsList = []string{"container-kill", "pod-delete", "pod-cpu-hog-exec", "pod-memory-hog-exec", "pod-io-stress", "pod-network-corruption", "pod-network-duplication", "pod-network-loss", "pod-network-latency"}
 var experimentsManifests map[string]types.ChaosChart
 var hubChartData []byte
 
@@ -56,13 +56,13 @@ func generateExperiment(experimentName string, composant resources.Object) []typ
 			experiments = append(experiments, exps[exp])
 		}
 		return experiments
-	case "pod-cpu-hog":
+	case "pod-cpu-hog-exec":
 		exps := podCPUHog.Generate(composant)
 		for exp := range exps {
 			experiments = append(experiments, exps[exp])
 		}
 		return experiments
-	case "pod-mem-hog":
+	case "pod-memory-hog-exec":
 		exps := podMemHog.Generate(composant)
 		for exp := range exps {
 			experiments = append(experiments, exps[exp])
